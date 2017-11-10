@@ -1,20 +1,22 @@
 package parser
 
 import (
-	"github.com/forchain/ethrpc"
-	"log"
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"time"
+	"github.com/forchain/ethrpc"
+	"io/ioutil"
+	"log"
 	"runtime"
 	"sync"
-	"io/ioutil"
+	"time"
 )
 
-var BLOCKS_PER_FILE = 100
-var FILES = 10
-var MAX_BLOCK = 5000000
+const BLOCKS_PER_FILE = 10000
+
+var MAX_BLOCK = 4500000
+
+const ADDRESS = "http://127.0.0.1:8545"
 
 var rpc_ *ethrpc.EthRPC
 
@@ -28,6 +30,9 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 	}
 	from := _file * BLOCKS_PER_FILE
 	to := from + BLOCKS_PER_FILE
+	if to > MAX_BLOCK {
+		to = MAX_BLOCK
+	}
 	for i := from; i < to; i++ {
 		if b, err := rpc_.EthGetBlockByNumber(i, true); err == nil {
 			w.Write([]byte(fmt.Sprintf("<%v> <p> <%v> .\n", b.Hash, b.ParentHash)))
@@ -42,8 +47,9 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 				}
 			}
 		} else {
-			log.Println(err)
-			break
+			log.Println(err, i, b)
+			time.Sleep(time.Second)
+			i--
 		}
 	}
 
@@ -57,7 +63,7 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 
 func Parse() {
 
-	rpc_ = ethrpc.NewEthRPC("http://10.147.18.28:8545")
+	rpc_ = ethrpc.NewEthRPC(ADDRESS)
 
 	var err error
 
@@ -76,11 +82,13 @@ func Parse() {
 	}
 	if num == 0 {
 		num = MAX_BLOCK
+	} else {
+		MAX_BLOCK = num
 	}
 	log.Println(num)
 
-	files := num / BLOCKS_PER_FILE
-	for i := 0; i < files && i < FILES; i++ {
+	files := (num-1)/BLOCKS_PER_FILE + 1
+	for i := 0; i < files; i++ {
 		wg.Add(1)
 		go parseBlock(i, wg)
 		if (i+1)%cpuNum == 0 {
