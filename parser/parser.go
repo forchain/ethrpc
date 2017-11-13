@@ -14,13 +14,12 @@ import (
 
 const BLOCKS_PER_FILE = 10000
 
-var MAX_BLOCK = 4500000
 
-const ADDRESS = "http://127.0.0.1:8545"
 
 var rpc_ *ethrpc.EthRPC
+var max_block_ = 4500000
 
-func parseBlock(_file int, _wg *sync.WaitGroup) {
+func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 	defer _wg.Done()
 
 	b := new(bytes.Buffer)
@@ -30,8 +29,8 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 	}
 	from := _file * BLOCKS_PER_FILE
 	to := from + BLOCKS_PER_FILE
-	if to > MAX_BLOCK {
-		to = MAX_BLOCK
+	if to > max_block_ {
+		to = max_block_
 	}
 	for i := from; i < to; i++ {
 		if b, err := rpc_.EthGetBlockByNumber(i, true); err == nil {
@@ -41,9 +40,9 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 			if len(b.Transactions) > 0 {
 				for _, t := range b.Transactions {
 					w.Write([]byte(fmt.Sprintf("<%v> <tx> <%v> .\n", t.BlockHash, t.Hash)))
-					w.Write([]byte(fmt.Sprintf("<%v> <f> \"%v\" .\n", t.Hash, t.From)))
-					w.Write([]byte(fmt.Sprintf("<%v> <t> \"%v\" .\n", t.Hash, t.To)))
-					w.Write([]byte(fmt.Sprintf("<%v> <v> \"%v\" .\n", t.Hash, t.Value.String())))
+					w.Write([]byte(fmt.Sprintf("<%v> <f> <%v> .\n", t.Hash, t.From)))
+					w.Write([]byte(fmt.Sprintf("<%v> <t> <%v> .\n", t.Hash, t.To)))
+					w.Write([]byte(fmt.Sprintf("<%v> <v> \"%v\"^^<xs:int> .\n", t.Hash, t.Value.String())))
 				}
 			}
 		} else {
@@ -54,16 +53,17 @@ func parseBlock(_file int, _wg *sync.WaitGroup) {
 	}
 
 	w.Close()
-	fileName := fmt.Sprintf("%v/%v.rdf.gz", "/tmp", _file)
+
+	fileName := fmt.Sprintf("%v/%v.rdf.gz", _outDir, _file)
 	if err := ioutil.WriteFile(fileName, b.Bytes(), 0666); err != nil {
 		log.Fatal(err)
 	}
 	log.Println(fileName)
 }
 
-func Parse() {
+func Parse(_rpc string, _out string) {
 
-	rpc_ = ethrpc.NewEthRPC(ADDRESS)
+	rpc_ = ethrpc.NewEthRPC(_rpc)
 
 	var err error
 
@@ -81,16 +81,16 @@ func Parse() {
 		log.Fatal(err)
 	}
 	if num == 0 {
-		num = MAX_BLOCK
+		num = max_block_
 	} else {
-		MAX_BLOCK = num
+		max_block_ = num
 	}
 	log.Println(num)
 
 	files := (num-1)/BLOCKS_PER_FILE + 1
 	for i := 0; i < files; i++ {
 		wg.Add(1)
-		go parseBlock(i, wg)
+		go parseBlock(i, wg, _out)
 		if (i+1)%cpuNum == 0 {
 			wg.Wait()
 		}
