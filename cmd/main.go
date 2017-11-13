@@ -12,7 +12,9 @@ func main() {
 	out := new(string)
 
 	flag.StringVar(rpc, "rpc", "127.0.0.1:8545", "RPC server address")
-	flag.StringVar(rpc, "out", "/tmp/dir", "Output directory")
+	flag.StringVar(out, "out", "/tmp/rdf", "Output directory")
+	flag.Parse()
+
 	if _, err := os.Stat(*out); os.IsNotExist(err) {
 		os.Mkdir(*out, 0666)
 	}

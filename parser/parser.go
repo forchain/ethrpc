@@ -14,8 +14,6 @@ import (
 
 const BLOCKS_PER_FILE = 10000
 
-
-
 var rpc_ *ethrpc.EthRPC
 var max_block_ = 4500000
 
@@ -46,7 +44,7 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 				}
 			}
 		} else {
-			log.Println(err, i, b)
+			log.Println(err, i)
 			time.Sleep(time.Second)
 			i--
 		}
@@ -63,7 +61,7 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 
 func Parse(_rpc string, _out string) {
 
-	rpc_ = ethrpc.NewEthRPC(_rpc)
+	rpc_ = ethrpc.NewEthRPC("http://" + _rpc)
 
 	var err error
 
