@@ -7,6 +7,7 @@ import (
 	"github.com/forchain/ethrpc"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"runtime"
 	"sync"
 	"time"
@@ -60,6 +61,8 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 }
 
 func Parse(_rpc string, _out string) {
+
+	http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = 10000
 
 	rpc_ = ethrpc.NewEthRPC("http://" + _rpc)
 
