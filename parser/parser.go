@@ -32,6 +32,7 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 	if to > max_block_ {
 		to = max_block_
 	}
+	zero := big.NewInt(0)
 	for i := from; i < to; i++ {
 		if b, err := rpc_.EthGetBlockByNumber(i, true); err == nil {
 			w.Write([]byte(fmt.Sprintf("<%v> <p> <%v> .\n", b.Hash, b.ParentHash)))
@@ -39,6 +40,9 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 			w.Write([]byte(fmt.Sprintf("<%v> <ts> \"%v\"^^<xs:dateTime> .\n", b.Hash, ts)))
 			if len(b.Transactions) > 0 {
 				for _, t := range b.Transactions {
+					if t.Value.Cmp(zero) == 0 || len(t.To) == 0 {
+						continue
+					}
 					w.Write([]byte(fmt.Sprintf("<%v> <tx> <%v> .\n", t.BlockHash, t.Hash)))
 					w.Write([]byte(fmt.Sprintf("<%v> <f> <%v> .\n", t.Hash, t.From)))
 					w.Write([]byte(fmt.Sprintf("<%v> <t> <%v> .\n", t.Hash, t.To)))
