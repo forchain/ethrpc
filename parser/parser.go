@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"math/big"
 )
 
 const BLOCKS_PER_FILE = 10000
@@ -41,7 +42,12 @@ func parseBlock(_file int, _wg *sync.WaitGroup, _outDir string) {
 					w.Write([]byte(fmt.Sprintf("<%v> <tx> <%v> .\n", t.BlockHash, t.Hash)))
 					w.Write([]byte(fmt.Sprintf("<%v> <f> <%v> .\n", t.Hash, t.From)))
 					w.Write([]byte(fmt.Sprintf("<%v> <t> <%v> .\n", t.Hash, t.To)))
-					w.Write([]byte(fmt.Sprintf("<%v> <v> \"%v\"^^<xs:int> .\n", t.Hash, t.Value.String())))
+
+					x := new(big.Float).SetInt(&t.Value)
+					y := new(big.Float).SetInt(big.NewInt(1000000000000000000))
+					z := new(big.Float).Quo(x, y)
+
+					w.Write([]byte(fmt.Sprintf("<%v> <v> \"%v\"^^<xs:float> .\n", t.Hash, z.String())))
 				}
 			}
 		} else {

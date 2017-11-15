@@ -4,6 +4,7 @@ import (
 	"github.com/forchain/ethrpc"
 	"testing"
 	"sync"
+	"math/big"
 )
 
 const ADDRESS = "http://10.147.18.28:8545"
@@ -25,4 +26,14 @@ func TestSingle(t *testing.T) {
 	go parseBlock(11, wg, "/tmp")
 	go parseBlock(12, wg, "/tmp")
 	wg.Wait()
+}
+
+func TestFloat(t *testing.T) {
+	s := "123456789000000000000"
+	i, _ := new(big.Int).SetString(s, 10)
+
+	x := new(big.Float).SetInt(i)
+	y := new(big.Float).SetInt(big.NewInt(1000000000000000000))
+	z := new(big.Float).Quo(x, y)
+	t.Log(z)
 }
