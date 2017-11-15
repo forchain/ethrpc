@@ -94,7 +94,7 @@ func Parse(_rpc string, _out string) {
 	}
 	log.Println(num)
 
-	files := (num-1)/BLOCKS_PER_FILE + 1
+	files := num / BLOCKS_PER_FILE
 	for i := 0; i < files; i++ {
 		wg.Add(1)
 		go parseBlock(i, wg, _out)
