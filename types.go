@@ -318,3 +318,75 @@ func (proxy *proxyBlockWithoutTransactions) toBlock() Block {
 
 	return block
 }
+
+/**
+    "result": {
+        "difficulty": "0x3ff800000",
+        "extraData": "0x59617465732052616e64616c6c202d2045746865724e696e6a61",
+        "gasLimit": "0x1388",
+        "gasUsed": "0x0",
+        "hash": "0x5cd50096dbb856a6d1befa6de8f9c20decb299f375154427d90761dc0b101109",
+        "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "miner": "0xc8ebccc5f5689fa8659d83713341e5ad19349448",
+        "mixHash": "0xf8c94dfe61cf26dcdf8cffeda337cf6a903d65c449d7691a022837f6e2d99459",
+        "nonce": "0x68b769c5451a7aea",
+        "number": "0x1",
+        "parentHash": "0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3",
+        "receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+        "sha3Uncles": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+        "size": "0x21a",
+        "stateRoot": "0x1e6e030581fd1873b4784280859cd3b3c04aa85520f08c304cf5ee63d3935add",
+        "timestamp": "0x55ba4242",
+        "totalDifficulty": null,
+        "transactionsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+        "uncles": []
+    }
+
+
+ */
+
+type proxyUncleBlock struct {
+	Number           hexInt   `json:"number"`           //
+	Hash             string   `json:"hash"`             //
+	ParentHash       string   `json:"parentHash"`       //
+	ReceiptsRoot     string   `json:"receiptsRoot"`     //
+	Nonce            string   `json:"nonce"`            //
+	Sha3Uncles       string   `json:"sha3Uncles"`       //
+	LogsBloom        string   `json:"logsBloom"`        //
+	TransactionsRoot string   `json:"transactionsRoot"` //
+	StateRoot        string   `json:"stateRoot"`        //
+	Miner            string   `json:"miner"`            //
+	MixHash          string   `json:"mixHash"`          //
+	Difficulty       hexBig   `json:"difficulty"`       //
+	//TotalDifficulty  hexBig   `json:"totalDifficulty"`  //
+	ExtraData        string   `json:"extraData"`        //
+	Size             hexInt   `json:"size"`             //
+	GasLimit         hexInt   `json:"gasLimit"`         //
+	GasUsed          hexInt   `json:"gasUsed"`          //
+	Timestamp        hexInt   `json:"timestamp"`        //
+	Uncles           []string `json:"uncles"`           //
+}
+
+func (proxy *proxyUncleBlock) toBlock() Block {
+	block := Block{
+		Number:           int(proxy.Number),
+		Hash:             proxy.Hash,
+		ParentHash:       proxy.ParentHash,
+		Nonce:            proxy.Nonce,
+		Sha3Uncles:       proxy.Sha3Uncles,
+		LogsBloom:        proxy.LogsBloom,
+		TransactionsRoot: proxy.TransactionsRoot,
+		StateRoot:        proxy.StateRoot,
+		Miner:            proxy.Miner,
+		Difficulty:       big.Int(proxy.Difficulty),
+		//TotalDifficulty:  big.Int(proxy.TotalDifficulty),
+		ExtraData:        proxy.ExtraData,
+		Size:             int(proxy.Size),
+		GasLimit:         int(proxy.GasLimit),
+		GasUsed:          int(proxy.GasUsed),
+		Timestamp:        int(proxy.Timestamp),
+		Uncles:           proxy.Uncles,
+	}
+
+	return block
+}

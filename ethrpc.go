@@ -356,6 +356,18 @@ func (rpc *EthRPC) EthEstimateGas(transaction T) (int, error) {
 	return ParseInt(response)
 }
 
+func (rpc *EthRPC) getUncle(method string, params ...interface{}) (*Block, error) {
+	response := new(proxyUncleBlock)
+
+	err := rpc.call(method, response, params...)
+	if err != nil {
+		return nil, err
+	}
+	block := response.toBlock()
+
+	return &block, nil
+}
+
 func (rpc *EthRPC) getBlock(method string, withTransactions bool, params ...interface{}) (*Block, error) {
 	var response proxyBlock
 	if withTransactions {
@@ -381,6 +393,16 @@ func (rpc *EthRPC) EthGetBlockByHash(hash string, withTransactions bool) (*Block
 // EthGetBlockByNumber returns information about a block by block number.
 func (rpc *EthRPC) EthGetBlockByNumber(number int, withTransactions bool) (*Block, error) {
 	return rpc.getBlock("eth_getBlockByNumber", withTransactions, IntToHex(number), withTransactions)
+}
+
+// EthGetUncleByBlockHashAndIndex Returns information about a uncle of a block by hash and uncle index position.
+func (rpc *EthRPC) EthGetUncleByBlockHashAndIndex(hash string, index int) (*Block, error) {
+	return rpc.getUncle("eth_getUncleByBlockHashAndIndex", hash, IntToHex(index))
+}
+
+// EthGetUncleByBlockNumberAndIndex Returns information about a uncle of a block by number and uncle index position.
+func (rpc *EthRPC) EthGetUncleByBlockNumberAndIndex(number int, index int) (*Block, error) {
+	return rpc.getUncle("eth_getUncleByBlockNumberAndIndex", IntToHex(number), IntToHex(index))
 }
 
 func (rpc *EthRPC) getTransaction(method string, params ...interface{}) (*Transaction, error) {
